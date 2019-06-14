@@ -20,6 +20,7 @@ class Apple(BaseModel):
 class Bite(BaseModel):
     slice = IntegerField()  # slice order (position)
     apple = ForeignKeyField(Apple, backref='bites')
+    m = IntegerField()  # the number of cells that has at least one entity
 
 
 def create_tables():

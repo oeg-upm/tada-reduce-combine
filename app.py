@@ -20,6 +20,7 @@ def add_bite():
     table_name = request.args.get('table').strip()
     column = int(request.args.get('column'))
     slice = int(request.args.get('slice'))
+    m = int(request.args.get('m'))
     tot = int(request.args.get('total'))  # total number of slices
 
     apples = Apple.select().where(Apple.table==table_name, Apple.column==column)
@@ -31,9 +32,9 @@ def add_bite():
         apple = apples[0]
         logger.log(LOG_LVL, "\nExisting apple: table=%s, columns=%d, slice=%d ,total=%d" % (table_name, column, slice, tot))
 
-    b = Bite(apple=apple, slice=slice)
+    b = Bite(apple=apple, slice=slice, m=m)
     b.save()
-    return 'Bite: %d is added' % b.slice
+    return jsonify({'msg': 'Bite: %d is added' % b.slice})
 
 
 @app.route('/list', methods=["GET"])
@@ -71,7 +72,6 @@ def status():
         else:
             d["status"] = "missing"
         apples.append(d)
-
     return jsonify(apples=apples)
 
 
