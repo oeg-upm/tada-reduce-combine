@@ -1,12 +1,15 @@
-from app import app
+import os
 import unittest
+
+from app import app
+from models import create_tables, database, Bite, Apple
 
 
 class CombineTest(unittest.TestCase):
 
     @classmethod
     def setUpClass(cls):
-        pass
+        create_tables()
 
     @classmethod
     def tearDownClass(cls):
@@ -28,4 +31,80 @@ class CombineTest(unittest.TestCase):
 
         # assert the status code of the response
         self.assertEqual(result.status_code, 200)
+
+    def test_add_bite(self):
+        fname = "test_volleyball_1.json"
+        fdir = os.path.join("tests", fname)
+        f = open(fdir)
+        table_name = "volleyball_single"
+        data = {'table': table_name, 'column': 0, 'slice': 0, 'total': 1, 'm': 3}
+        data['file_slice'] = (f, "volleyball.csv")
+        Bite.delete().execute()  # delete all Bites
+        Apple.delete().execute()  # delete all Apples
+        result = self.app.post('/add', data=data, content_type='multipart/form-data')
+        self.assertEqual(result.status_code, 200, msg=result.data)
+        database.connect(reuse_if_open=True)
+        self.assertEqual(len(Bite.select()), 1)
+
+        result = self.app.get('/status')
+        self.assertEqual(result.status_code, 200, msg=result.data)
+        self.assertTrue(result.is_json)
+        j = {
+            "apples": [
+
+                {
+                    "apple": table_name,
+                    "status": "complete"
+                }
+            ]
+        }
+        self.assertDictEqual(result.get_json(), j)
+
+    def test_add_multiple_bite(self):
+        fname = "test_volleyball_1.json"
+        fdir = os.path.join("tests", fname)
+        f = open(fdir)
+        table_name = "volleyball_double"
+        data = {'table': table_name, 'column': 0, 'slice': 0, 'total': 2, 'm': 3}
+        data['file_slice'] = (f, "volleyball.csv")
+        Bite.delete().execute()  # delete all Bites
+        Apple.delete().execute()  # delete all Apples
+        result = self.app.post('/add', data=data, content_type='multipart/form-data')
+        self.assertEqual(result.status_code, 200, msg=result.data)
+        database.connect(reuse_if_open=True)
+        self.assertEqual(len(Bite.select()), 1)
+        result = self.app.get('/status')
+        self.assertEqual(result.status_code, 200, msg=result.data)
+        self.assertTrue(result.is_json)
+        j = {
+            "apples": [
+
+                {
+                    "apple": table_name,
+                    "status": "missing"
+                }
+            ]
+        }
+        self.assertDictEqual(result.get_json(), j)
+
+        f = open(fdir)
+        data = {'table': table_name, 'column': 0, 'slice': 1, 'total': 2, 'm': 3}
+        data['file_slice'] = (f, "volleyball.csv")
+        result = self.app.post('/add', data=data, content_type='multipart/form-data')
+        self.assertEqual(result.status_code, 200, msg=result.data)
+        database.connect(reuse_if_open=True)
+        self.assertEqual(len(Bite.select()), 2)
+        result = self.app.get('/status')
+        self.assertEqual(result.status_code, 200, msg=result.data)
+        self.assertTrue(result.is_json)
+        j = {
+            "apples": [
+
+                {
+                    "apple": table_name,
+                    "status": "complete"
+                }
+            ]
+        }
+        self.assertDictEqual(result.get_json(), j)
 

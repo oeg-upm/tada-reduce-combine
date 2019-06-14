@@ -15,13 +15,16 @@ def hello_world():
     return 'Hello World! This is Combine'
 
 
-@app.route('/add', methods=["GET"])
+@app.route('/add', methods=["POST"])
 def add_bite():
-    table_name = request.args.get('table').strip()
-    column = int(request.args.get('column'))
-    slice = int(request.args.get('slice'))
-    m = int(request.args.get('m'))
-    tot = int(request.args.get('total'))  # total number of slices
+    table_name = request.values.get('table').strip()
+    column = int(request.values.get('column'))
+    slice = int(request.values.get('slice'))
+    m = int(request.values.get('m'))
+    tot = int(request.values.get('total'))  # total number of slices
+
+    uploaded_file = request.files['file_slice']
+
 
     apples = Apple.select().where(Apple.table==table_name, Apple.column==column)
     if len(apples) == 0:
@@ -33,6 +36,10 @@ def add_bite():
         logger.log(LOG_LVL, "\nExisting apple: table=%s, columns=%d, slice=%d ,total=%d" % (table_name, column, slice, tot))
 
     b = Bite(apple=apple, slice=slice, m=m)
+    b.save()
+    fname = "%d-%s-%d-%d.json"
+    uploaded_file.save(os.path.join('local_uploads', fname))
+    b.fname = fname
     b.save()
     return jsonify({'msg': 'Bite: %d is added' % b.slice})
 
@@ -99,81 +106,11 @@ def reason():
 
     return html
 
-    # d = dict()
-    # meta = dict()
-    # for bite in Bite.select():
-    #     if bite.table not in d:
-    #         d[bite.table] = dict()
-    #         meta[bite.table] = dict()
-    #     if bite.column not in d[bite.table]:
-    #         d[bite.table][bite.column] = []
-    #         meta[bite.table][bite.column] = dict()
-    #         meta[bite.table][bite.column]["total"] = bite.total
-    #
-    #     d[bite.table][bite.column].append(bite.slice)
-    #
-    # print("tables: "+str(d.keys()))
-    # for table in d.keys():
-    #     for col in d[table].keys():
-    #         bites += "<tr>"
-    #         bites += "<td>%s</td>\n" % table
-    #         bites += "<td>%d</td>\n" % col
-    #         print("table: "+str(table)+" col: "+str(col))
-    #         print("range: "+str(range(max(d[table][col]))))
-    #         print("sorted: "+str(sorted(d[table][col])))
-    #         if range(max(d[table][col])+1) == sorted(d[table][col]):
-    #             bites += "<td>Complete</td>\n"
-    #         else:
-    #             bites += "<td> Missing </td>\n"
-    #
-    #         bites += "</tr>"
-    #
-    # bites += "</table>"
-    # return bites
-
-# @app.route('/reason', methods=["GET"])
-# def reason():
-#     bites = """
-#     Bites
-#     <table>
-#     """
-#     d = dict()
-#     meta = dict()
-#     for bite in Bite.select():
-#         if bite.table not in d:
-#             d[bite.table] = dict()
-#             meta[bite.table] = dict()
-#         if bite.column not in d[bite.table]:
-#             d[bite.table][bite.column] = []
-#             meta[bite.table][bite.column] = dict()
-#             meta[bite.table][bite.column]["total"] = bite.total
-#
-#         d[bite.table][bite.column].append(bite.slice)
-#
-#     print("tables: "+str(d.keys()))
-#     for table in d.keys():
-#         for col in d[table].keys():
-#             bites += "<tr>"
-#             bites += "<td>%s</td>\n" % table
-#             bites += "<td>%d</td>\n" % col
-#             print("table: "+str(table)+" col: "+str(col))
-#             print("range: "+str(range(max(d[table][col]))))
-#             print("sorted: "+str(sorted(d[table][col])))
-#             if range(max(d[table][col])+1) == sorted(d[table][col]):
-#                 bites += "<td>Complete</td>\n"
-#             else:
-#                 bites += "<td> Missing </td>\n"
-#
-#             bites += "</tr>"
-#
-#     bites += "</table>"
-#     return bites
-
 
 @app.before_request
 def before_request():
     g.db = database
-    g.db.connect()
+    g.db.connect(reuse_if_open=True)
 
 
 @app.after_request
