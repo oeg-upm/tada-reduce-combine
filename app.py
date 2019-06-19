@@ -25,7 +25,6 @@ def add_bite():
 
     uploaded_file = request.files['file_slice']
 
-
     apples = Apple.select().where(Apple.table==table_name, Apple.column==column)
     if len(apples) == 0:
         logger.log(LOG_LVL, "\nNew apple: table=%s, columns=%d, slice=%d ,total=%d" % (table_name, column, slice, tot))
@@ -41,7 +40,7 @@ def add_bite():
     uploaded_file.save(os.path.join('local_uploads', fname))
     b.fname = fname
     b.save()
-    return jsonify({'msg': 'Bite: %d is added' % b.slice})
+    return jsonify({"apple": apple.id, "bite": b.id, "processing": False})
 
 
 @app.route('/list', methods=["GET"])

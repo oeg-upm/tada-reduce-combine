@@ -10,11 +10,17 @@ class BaseModel(Model):
     class Meta:
         database = database
 
+STATUS_NEW, STATUS_PROCESSING, STATUS_COMPLETE, STATUS_STOPPED = "New", "Processing", "Complete", "Stopped"
+APPLE_STATUSES = [
+    STATUS_NEW, STATUS_PROCESSING, STATUS_COMPLETE, STATUS_STOPPED
+]
+
 
 class Apple(BaseModel):
     table = CharField()  # table name or id
     column = IntegerField()  # column order (position)
     total = IntegerField()  # Total number of bites/slices
+    status = CharField(default=STATUS_NEW, choices=APPLE_STATUSES)
 
 
 class Bite(BaseModel):
