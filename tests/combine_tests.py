@@ -26,22 +26,14 @@ class CombineTest(unittest.TestCase):
         self.app = app.test_client()
         # propagate the exceptions to the test client
         self.app.testing = True
+        app.testing = True
 
     def tearDown(self):
         pass
 
     def test_pages_status_code(self):
-        # sends HTTP GET request to the application
-        # on the specified path
         result = self.app.get('/')
-        # assert the status code of the response
         self.assertEqual(result.status_code, 200)
-
-        # result = self.app.get('/reason')
-        # self.assertEqual(result.status_code, 200)
-
-        # result = self.app.get('/list')
-        # self.assertEqual(result.status_code, 200)
 
     def test_add_bite(self):
         fname = "test_volleyball_1.json"

@@ -58,11 +58,12 @@ def add_bite():
         apple.save()
 
     if apple.complete:
-        # if app.test
-        # combine_graphs(apple.id)
-        g.db.close()
-        p = Process(target=combine_graphs, args=(apple.id,))
-        p.start()
+        if app.testing:
+            combine_graphs(apple.id)
+        else:
+            g.db.close()
+            p = Process(target=combine_graphs, args=(apple.id,))
+            p.start()
     return jsonify({"apple": apple.id, "bite": b.id})
 
 
