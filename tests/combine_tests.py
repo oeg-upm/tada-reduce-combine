@@ -42,7 +42,7 @@ class CombineTest(unittest.TestCase):
         table_name = "volleyball_single"
         table_col = 0
         data = {'table': table_name, 'column': table_col, 'slice': 0, 'total': 1, 'm': 3}
-        data['file_slice'] = (f, "volleyball.csv")
+        data['graph'] = (f, "volleyball.csv")
         Bite.delete().execute()  # delete all Bites
         Apple.delete().execute()  # delete all Apples
         result = self.app.post('/add', data=data, content_type='multipart/form-data')
@@ -78,7 +78,7 @@ class CombineTest(unittest.TestCase):
         table_name = "volleyball_double"
         table_col = 0
         data = {'table': table_name, 'column': table_col, 'slice': 0, 'total': 2, 'm': 3}
-        data['file_slice'] = (f, "volleyball.csv")
+        data['graph'] = (f, "volleyball.csv")
         Bite.delete().execute()  # delete all Bites
         Apple.delete().execute()  # delete all Apples
         result = self.app.post('/add', data=data, content_type='multipart/form-data')
@@ -103,7 +103,7 @@ class CombineTest(unittest.TestCase):
         fdir = os.path.join("tests", fname)
         f = open(fdir)
         data = {'table': table_name, 'column': table_col, 'slice': 1, 'total': 2, 'm': 3}
-        data['file_slice'] = (f, "volleyball.csv")
+        data['graph'] = (f, "volleyball.csv")
         result = self.app.post('/add', data=data, content_type='multipart/form-data')
         self.assertEqual(result.status_code, 200, msg=result.data)
         database.connect(reuse_if_open=True)
@@ -135,7 +135,7 @@ class CombineTest(unittest.TestCase):
         f = open(fdir)
         table_name = "volleyball_double"
         data = {'table': table_name, 'column': 0, 'slice': 0, 'total': 3, 'm': 3}
-        data['file_slice'] = (f, "volleyball.csv")
+        data['graph'] = (f, "volleyball.csv")
         Bite.delete().execute()  # delete all Bites
         Apple.delete().execute()  # delete all Apples
         result = self.app.post('/add', data=data, content_type='multipart/form-data')
@@ -161,7 +161,7 @@ class CombineTest(unittest.TestCase):
         fdir = os.path.join("tests", fname)
         f = open(fdir)
         data = {'table': table_name, 'column': 0, 'slice': 1, 'total': 3, 'm': 3}
-        data['file_slice'] = (f, "volleyball.csv")
+        data['graph'] = (f, "volleyball.csv")
         result = self.app.post('/add', data=data, content_type='multipart/form-data')
         self.assertEqual(result.status_code, 200, msg=result.data)
         database.connect(reuse_if_open=True)

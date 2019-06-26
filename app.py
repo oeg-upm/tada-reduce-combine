@@ -29,7 +29,7 @@ def add_bite():
     m = int(request.values.get('m'))
     tot = int(request.values.get('total'))  # total number of slices
 
-    uploaded_file = request.files['file_slice']
+    uploaded_file = request.files['graph']
 
     apples = Apple.select().where(Apple.table==table_name, Apple.column==column)
     if len(apples) == 0:
