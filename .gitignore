@@ -1,4 +1,7 @@
 *.db
+*.db-shm
+*.db-wal
+
 .idea/
 
 # Byte-compiled / optimized / DLL files

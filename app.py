@@ -57,10 +57,12 @@ def add_bite():
         apple.complete = True
         apple.save()
 
-    # if apple.complete:
-    #     # combine_graphs(database, apple)
-    #     p = Process(target=combine_graphs, args=(database, apple,))
-    #     p.start()
+    if apple.complete:
+
+        # combine_graphs(database, apple)
+        g.db.close()
+        p = Process(target=combine_graphs, args=(apple.id,))
+        p.start()
     return jsonify({"apple": apple.id, "bite": b.id})
 
 
@@ -88,17 +90,31 @@ def received():
 
 @app.route('/status', methods=["GET"])
 def status():
-    apples = []
-    for apple in Apple.select():
-        slices = []
-        for bite in apple.bites:
-            slices.append(bite.slice)
-        d = {"apple": apple.table}
-        if sorted(slices) == range(apple.total):
-            d["status"] = "complete"
-        else:
-            d["status"] = "missing"
-        apples.append(d)
+    # apples = []
+    # for apple in Apple.select():
+    #     slices = []
+    #     for bite in apple.bites:
+    #         slices.append(bite.slice)
+    #     d = {"apple": apple.table}
+    #     if sorted(slices) == range(apple.total):
+    #         d["status"] = "complete"
+    #     else:
+    #         d["status"] = "missing"
+    #     apples.append(d)
+    # return jsonify(apples=apples)
+    # apples = []
+    # for apple in Apple.select(Apple.table, Apple.status, Apple.complete):
+    #     d = {"apple": apple.table, "status": apple.status, "complete": apple.}
+    #     if apple.complete:
+    #         print("apple: %s, status: %s" % (apple.table, str(apple.complete)))
+    #         d["status"] = "complete"
+    #     else:
+    #         d["status"] = "missing"
+    #     apples.append(d)
+    # return jsonify(apples=apples)
+    # return jsonify(apples=Apple.select())
+    apples = [{"apple": apple.table, "status": apple.status, "complete": apple.complete} for apple in Apple.select()]
+    #return jsonify(apples=Apple.select(Apple.table, Apple.status, Apple.complete))
     return jsonify(apples=apples)
 
 
@@ -146,23 +162,49 @@ def multi_process():
     return jsonify(results=["Yes"])
 
 
-# def combine_graphs(database, apple):
-#     create_tables()
-#     database.connect(reuse_if_open=True)
-#     # apple = Apple.select().where(Apple.id==apple_id)[0]
-#     apple.status = STATUS_PROCESSING
-#     apple.save()
-#     graphs = []
-#     for bite in apple.bites:
-#         f = open(os.path.join(UPLOAD_DIR, bite.fname))
-#         j = json.load(f)
-#         graphs.append(j)
-#         f.close()
-#     database.close()
+def combine_graphs(apple_id):
+    #create_tables()
+    # database.connect(reuse_if_open=True)
+    # apple = Apple.select().where(Apple.id==apple_id)[0]
+    # create_tables()
+    database = get_database()
+    database.connect(reuse_if_open=True)
+    apple = Apple.select().where(Apple.id==apple_id)[0]
+    apple.status = STATUS_PROCESSING
+    apple.save()
+    graphs = []
+    for bite in apple.bites:
+        print("bite: %d" % bite.id)
+        f = open(os.path.join(UPLOAD_DIR, bite.fname))
+        j = json.load(f)
+        graphs.append(j)
+        f.close()
+    graph = merge_graphs(graphs=graphs)
+    fname = "%d-%s-%d-merged.json" % (apple.id, apple.table.replace(" ", "_"), apple.column)
+    f = open(os.path.join(UPLOAD_DIR, fname), "w")
+    f.write(json.dumps(graph))
+    f.close()
+    apple.fname = fname
+    apple.status = STATUS_COMPLETE
+    apple.save()
+    database.close()
 
 
 def merge_graphs(graphs):
-    pass
+    if len(graphs) == 1:
+        return graphs[0]
+    elif len(graphs) == []:
+        return None
+    else:
+        graph = graphs[0]
+        for g in graphs[1:]:
+            for uri in g.keys():
+                if uri in graph:
+                    graph[uri]["Lc"] += g[uri]["Lc"]
+                else:
+                    graph[uri] = g[uri]
+        return graph
+
 
 
 
