@@ -1,13 +1,19 @@
+import sys
+import json
+from multiprocessing import Process
+from time import sleep
 import os
 import logging
+from flask import Flask, g, request, jsonify
+from models import get_database, create_tables
+from models import Bite, Apple
+from models import STATUS_PROCESSING, STATUS_COMPLETE
 logging.basicConfig(level=logging.INFO)
 LOG_LVL = logging.INFO
 logger = logging.getLogger(__name__)
 
-from flask import Flask, g, request, jsonify
-from models import database, create_tables
-from models import Bite, Apple
 app = Flask(__name__)
+UPLOAD_DIR = 'local_uploads'
 
 
 @app.route('/')
@@ -34,13 +40,28 @@ def add_bite():
         apple = apples[0]
         logger.log(LOG_LVL, "\nExisting apple: table=%s, columns=%d, slice=%d ,total=%d" % (table_name, column, slice, tot))
 
+    if apple.complete:
+        return jsonify(error="The apple is already complete, your request will not be processed"), 400
+
     b = Bite(apple=apple, slice=slice, m=m)
     b.save()
-    fname = "%d-%s-%d-%d.json"
-    uploaded_file.save(os.path.join('local_uploads', fname))
+    fname = "%d-%s-%d-%d.json" % (b.id, b.apple.table.replace(" ", "_"), b.apple.column, b.slice)
+    uploaded_file.save(os.path.join(UPLOAD_DIR, fname))
     b.fname = fname
     b.save()
-    return jsonify({"apple": apple.id, "bite": b.id, "processing": False})
+
+    slices = []
+    for bite in apple.bites:
+        slices.append(bite.slice)
+    if sorted(slices) == range(apple.total):
+        apple.complete = True
+        apple.save()
+
+    # if apple.complete:
+    #     # combine_graphs(database, apple)
+    #     p = Process(target=combine_graphs, args=(database, apple,))
+    #     p.start()
+    return jsonify({"apple": apple.id, "bite": b.id})
 
 
 @app.route('/list', methods=["GET"])
@@ -108,7 +129,7 @@ def reason():
 
 @app.before_request
 def before_request():
-    g.db = database
+    g.db = get_database()
     g.db.connect(reuse_if_open=True)
 
 
@@ -116,6 +137,51 @@ def before_request():
 def after_request(response):
     g.db.close()
     return response
+
+
+@app.route('/process')
+def multi_process():
+    p = Process(target=f, args=('bob',))
+    p.start()
+    return jsonify(results=["Yes"])
+
+
+# def combine_graphs(database, apple):
+#     create_tables()
+#     database.connect(reuse_if_open=True)
+#     # apple = Apple.select().where(Apple.id==apple_id)[0]
+#     apple.status = STATUS_PROCESSING
+#     apple.save()
+#     graphs = []
+#     for bite in apple.bites:
+#         f = open(os.path.join(UPLOAD_DIR, bite.fname))
+#         j = json.load(f)
+#         graphs.append(j)
+#         f.close()
+#     database.close()
+
+
+def merge_graphs(graphs):
+    pass
+
+
+
+
+
+
+
+
+
+
+def f(name):
+    print('hello', name)
+    for i in range(5):
+        print("Hello")
+        sleep(1)
+
+
+
+
 
 
 if __name__ == '__main__':

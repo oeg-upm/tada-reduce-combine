@@ -1,14 +1,23 @@
-from peewee import SqliteDatabase, Model, CharField, IntegerField, ForeignKeyField
+from peewee import SqliteDatabase, Model, CharField, IntegerField, ForeignKeyField, BooleanField
 
 DATABASE = 'data.db'
 
 
-database = SqliteDatabase(DATABASE)
+# database = SqliteDatabase(DATABASE)
 
 
 class BaseModel(Model):
     class Meta:
-        database = database
+        # database = database
+        database = SqliteDatabase(DATABASE)
+
+
+def get_database(database=None):
+    if database is None:
+        return SqliteDatabase(DATABASE)
+    else:
+        return SqliteDatabase(database)
+
 
 STATUS_NEW, STATUS_PROCESSING, STATUS_COMPLETE, STATUS_STOPPED = "New", "Processing", "Complete", "Stopped"
 APPLE_STATUSES = [
@@ -21,6 +30,7 @@ class Apple(BaseModel):
     column = IntegerField()  # column order (position)
     total = IntegerField()  # Total number of bites/slices
     status = CharField(default=STATUS_NEW, choices=APPLE_STATUSES)
+    complete = BooleanField(default=False)
 
 
 class Bite(BaseModel):
@@ -31,6 +41,7 @@ class Bite(BaseModel):
 
 
 def create_tables():
+    database = get_database()
     with database:
         database.create_tables([Apple, Bite, ])
 

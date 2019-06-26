@@ -2,8 +2,9 @@ import os
 import unittest
 
 from app import app
-from models import create_tables, database, Bite, Apple
+from models import create_tables, get_database, Bite, Apple
 
+database = get_database()
 
 class CombineTest(unittest.TestCase):
 
