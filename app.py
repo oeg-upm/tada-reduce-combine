@@ -58,89 +58,18 @@ def add_bite():
         apple.save()
 
     if apple.complete:
-
-        # combine_graphs(database, apple)
+        # if app.test
+        # combine_graphs(apple.id)
         g.db.close()
         p = Process(target=combine_graphs, args=(apple.id,))
         p.start()
     return jsonify({"apple": apple.id, "bite": b.id})
 
 
-@app.route('/list', methods=["GET"])
-def received():
-    bites = """
-    Bites
-    <table>
-        <tr>
-            <td>Table</td>
-            <td>Column</td>
-            <td>Slice</td>
-        </tr>
-    """
-
-    for bite in Bite.select():
-        bites += "<tr>"
-        bites += "<td>%s</td>\n" % bite.apple.table
-        bites += "<td>%d</td>\n" % bite.apple.column
-        bites += "<td>%d</td>\n" % bite.slice
-        bites += "</tr>"
-    bites += "</table>"
-    return bites
-
-
 @app.route('/status', methods=["GET"])
 def status():
-    # apples = []
-    # for apple in Apple.select():
-    #     slices = []
-    #     for bite in apple.bites:
-    #         slices.append(bite.slice)
-    #     d = {"apple": apple.table}
-    #     if sorted(slices) == range(apple.total):
-    #         d["status"] = "complete"
-    #     else:
-    #         d["status"] = "missing"
-    #     apples.append(d)
-    # return jsonify(apples=apples)
-    # apples = []
-    # for apple in Apple.select(Apple.table, Apple.status, Apple.complete):
-    #     d = {"apple": apple.table, "status": apple.status, "complete": apple.}
-    #     if apple.complete:
-    #         print("apple: %s, status: %s" % (apple.table, str(apple.complete)))
-    #         d["status"] = "complete"
-    #     else:
-    #         d["status"] = "missing"
-    #     apples.append(d)
-    # return jsonify(apples=apples)
-    # return jsonify(apples=Apple.select())
     apples = [{"apple": apple.table, "status": apple.status, "complete": apple.complete} for apple in Apple.select()]
-    #return jsonify(apples=Apple.select(Apple.table, Apple.status, Apple.complete))
     return jsonify(apples=apples)
-
-
-@app.route('/reason', methods=["GET"])
-def reason():
-    html = """
-    <html><body>
-    Apples
-    <table>
-    """
-    for apple in Apple.select():
-        slices = []
-        for bite in apple.bites:
-            slices.append(bite.slice)
-        html += "<tr>"
-        html += "<td>%s</td>" % apple.table
-        html += "<td>%d</td>" % apple.column
-        if sorted(slices) == range(apple.total):
-            html += "<td> Completed </td>"
-        else:
-            html += "<td> Missing </td>"
-        html += "</tr>"
-
-    html += "</table></body></html>"
-
-    return html
 
 
 @app.before_request
@@ -163,10 +92,6 @@ def multi_process():
 
 
 def combine_graphs(apple_id):
-    #create_tables()
-    # database.connect(reuse_if_open=True)
-    # apple = Apple.select().where(Apple.id==apple_id)[0]
-    # create_tables()
     database = get_database()
     database.connect(reuse_if_open=True)
     apple = Apple.select().where(Apple.id==apple_id)[0]
@@ -204,26 +129,6 @@ def merge_graphs(graphs):
                 else:
                     graph[uri] = g[uri]
         return graph
-
-
-
-
-
-
-
-
-
-
-
-def f(name):
-    print('hello', name)
-    for i in range(5):
-        print("Hello")
-        sleep(1)
-
-
-
-
 
 
 if __name__ == '__main__':

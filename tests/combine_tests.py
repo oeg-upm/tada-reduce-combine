@@ -37,11 +37,11 @@ class CombineTest(unittest.TestCase):
         # assert the status code of the response
         self.assertEqual(result.status_code, 200)
 
-        result = self.app.get('/reason')
-        self.assertEqual(result.status_code, 200)
+        # result = self.app.get('/reason')
+        # self.assertEqual(result.status_code, 200)
 
-        result = self.app.get('/list')
-        self.assertEqual(result.status_code, 200)
+        # result = self.app.get('/list')
+        # self.assertEqual(result.status_code, 200)
 
     def test_add_bite(self):
         fname = "test_volleyball_1.json"
