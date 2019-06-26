@@ -35,6 +35,9 @@ class CombineTest(unittest.TestCase):
         result = self.app.get('/')
         self.assertEqual(result.status_code, 200)
 
+        result = self.app.get('/list')
+        self.assertEqual(result.status_code, 200)
+
     def test_add_bite(self):
         fname = "test_volleyball_1.json"
         fdir = os.path.join("tests", fname)

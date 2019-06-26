@@ -36,12 +36,32 @@ class Apple(BaseModel):
     complete = BooleanField(default=False)  # Whether there are missing slices or not
     fname = CharField(default="")
 
+    def json(self):
+        return {
+            "id": self.id,
+            "table": self.table,
+            "column": self.column,
+            "total": self.total,
+            "status": self.status,
+            "complete": self.complete,
+            "fname": self.fname
+        }
+
 
 class Bite(BaseModel):
     slice = IntegerField()  # slice order (position)
     apple = ForeignKeyField(Apple, backref='bites')
     m = IntegerField()  # the number of cells that has at least one entity
     fname = CharField(null=True)  # the name of the file
+
+    def json(self):
+        return {
+            "id": self.id,
+            "slice": self.slice,
+            "apple": self.apple.json(),
+            "m": self.m,
+            "fname": str(self.fname)
+        }
 
 
 def create_tables():

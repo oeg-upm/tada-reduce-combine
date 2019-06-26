@@ -73,6 +73,11 @@ def status():
     return jsonify(apples=apples)
 
 
+@app.route('/list', methods=["GET"])
+def all_bites():
+    return jsonify(bites=[b.json() for b in Bite.select()])
+
+
 @app.before_request
 def before_request():
     g.db = get_database()
