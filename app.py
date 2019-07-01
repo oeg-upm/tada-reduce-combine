@@ -72,15 +72,14 @@ def status():
     apples = [{"apple": apple.table, "status": apple.status, "complete": apple.complete} for apple in Apple.select()]
     return jsonify(apples=apples)
 
+@app.route('/list', methods=["GET"])
+def all_apples():
+    return jsonify(apples=[apple.json() for apple in Apple.select()])
+
 
 @app.route('/list_bites', methods=["GET"])
 def all_bites():
     return jsonify(bites=[b.json() for b in Bite.select()])
-
-
-@app.route('/list', methods=["GET"])
-def all_apples():
-    return jsonify(apples=[apple.json() for apple in Apple.select()])
 
 
 @app.route('/get_graph', methods=["GET"])
