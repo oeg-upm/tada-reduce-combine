@@ -44,7 +44,8 @@ class Apple(BaseModel):
             "total": self.total,
             "status": self.status,
             "complete": self.complete,
-            "fname": self.fname
+            "fname": self.fname,
+            "m": sum(b.m for b in self.bites)
         }
 
 
