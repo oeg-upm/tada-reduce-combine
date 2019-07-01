@@ -35,6 +35,9 @@ class CombineTest(unittest.TestCase):
         result = self.app.get('/')
         self.assertEqual(result.status_code, 200)
 
+        result = self.app.get('/list_bites')
+        self.assertEqual(result.status_code, 200)
+
         result = self.app.get('/list')
         self.assertEqual(result.status_code, 200)
 
@@ -73,6 +76,14 @@ class CombineTest(unittest.TestCase):
         target_uri = "http://dbpedia.org/ontology/VolleyballPlayer"
         self.assertEqual(merge_graph[target_uri]["Lc"], 0.5)
         f.close()
+
+        result = self.app.get('/list')
+        j = result.json
+        apples = j['apples']
+        self.assertEqual(len(apples), 1)
+        j_apple = apples[0]
+        result = self.app.get('/get_graph?id='+str(j_apple["id"]))
+        self.assertEqual(200, result.status_code, msg=result.data)
 
     def test_add_multiple_bite(self):
         fname = "test_volleyball_1.json"

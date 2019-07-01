@@ -4,7 +4,7 @@ from multiprocessing import Process
 from time import sleep
 import os
 import logging
-from flask import Flask, g, request, jsonify
+from flask import Flask, g, request, jsonify, send_from_directory, abort
 from models import get_database, create_tables
 from models import Bite, Apple
 from models import STATUS_PROCESSING, STATUS_COMPLETE
@@ -73,9 +73,26 @@ def status():
     return jsonify(apples=apples)
 
 
-@app.route('/list', methods=["GET"])
+@app.route('/list_bites', methods=["GET"])
 def all_bites():
     return jsonify(bites=[b.json() for b in Bite.select()])
+
+
+@app.route('/list', methods=["GET"])
+def all_apples():
+    return jsonify(apples=[apple.json() for apple in Apple.select()])
+
+
+@app.route('/get_graph', methods=["GET"])
+def get_graph():
+    apple_id = request.values.get('id')
+    apples = Apple.select().where(Apple.id==apple_id)
+    if len(apples) == 1:
+        apple = apples[0]
+        fname = apple.fname
+        if fname != "":
+            return send_from_directory(UPLOAD_DIR, fname, as_attachment=True)
+    abort(404)
 
 
 @app.before_request
