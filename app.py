@@ -72,6 +72,7 @@ def status():
     apples = [{"apple": apple.table, "status": apple.status, "complete": apple.complete} for apple in Apple.select()]
     return jsonify(apples=apples)
 
+
 @app.route('/list', methods=["GET"])
 def all_apples():
     return jsonify(apples=[apple.json() for apple in Apple.select()])
@@ -85,7 +86,12 @@ def all_bites():
 @app.route('/get_graph', methods=["GET"])
 def get_graph():
     apple_id = request.values.get('id')
+    #apple_id = int(apple_id)
     apples = Apple.select().where(Apple.id==apple_id)
+    print("apples: ")
+    print(apples)
+    print("len: ")
+    print(len(apples))
     if len(apples) == 1:
         apple = apples[0]
         fname = apple.fname
