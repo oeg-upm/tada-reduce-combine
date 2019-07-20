@@ -182,7 +182,7 @@ def add_node_from_graph(g1, g2, uri):
     :return:
     """
     added = []
-    parents = get_parents_of_node(uri)
+    parents = get_parents_of_node(g2, uri)
     for p in parents:
         if p not in g1:
             added += add_node_from_graph(g1, g2, uri)
