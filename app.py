@@ -151,12 +151,50 @@ def merge_graphs(graphs):
     else:
         graph = graphs[0]
         for g in graphs[1:]:
+            new_uris = []
             for uri in g.keys():
                 if uri in graph:
                     graph[uri]["Lc"] += g[uri]["Lc"]
                 else:
-                    graph[uri] = g[uri]
+                    # graph[uri] = g[uri]
+                    new_uris.append(uri)
+            while new_uris != []:
+                added = add_node_from_graph(graph, g, new_uris[0])
+                for a in added:
+                    new_uris.remove(a)
         return graph
+
+
+def get_parents_of_node(g, uri):
+    parents = []
+    for k in g.keys():
+        if uri in g[k]["childs"]:
+            parents.append(k)
+    return parents
+
+
+def add_node_from_graph(g1, g2, uri):
+    """
+    Assume acyclic graphs
+    :param g1:
+    :param g2:
+    :param uri:
+    :return:
+    """
+    added = []
+    parents = get_parents_of_node(uri)
+    for p in parents:
+        if p not in g1:
+            added += add_node_from_graph(g1, g2, uri)
+            # added.append(p)
+
+    for p in parents:
+        g1[p]["childs"].append(uri)
+
+    g1[uri] = g2[uri]
+    added.append(uri)
+
+    return added
 
 
 if __name__ == '__main__':
