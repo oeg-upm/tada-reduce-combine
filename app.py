@@ -4,7 +4,7 @@ from multiprocessing import Process
 from time import sleep
 import os
 import logging
-from flask import Flask, g, request, jsonify, send_from_directory, abort
+from flask import Flask, g, request, jsonify, send_from_directory, abort, render_template
 from models import get_database, create_tables
 from models import Bite, Apple
 from models import STATUS_PROCESSING, STATUS_COMPLETE
@@ -21,8 +21,10 @@ def hello_world():
     return 'Hello World! This is Combine'
 
 
-@app.route('/add', methods=["POST"])
+@app.route('/add', methods=["POST","GET"])
 def add_bite():
+    if request.method == 'GET':
+        return render_template('combine.html')
     table_name = request.values.get('table').strip()
     column = int(request.values.get('column'))
     slice = int(request.values.get('slice'))
@@ -146,7 +148,7 @@ def combine_graphs(apple_id):
 def merge_graphs(graphs):
     if len(graphs) == 1:
         return graphs[0]
-    elif len(graphs) == []:
+    elif len(graphs) == 0:
         return None
     else:
         graph = graphs[0]
